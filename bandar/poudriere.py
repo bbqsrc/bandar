@@ -31,11 +31,12 @@ class Poudriere:
     def __init__(self, ports_path, name=None):
         self.__cleaned = False
 
-        self.name = name or uuid.uuid4().hex
+        self.name = name or uuid.uuid4().hex[:12]
         self.ports_path = ports_path
 
-        subprocess.check_output(['poudriere', 'ports', '-c', '-F', '-f',
-            'none', '-M', self.ports_path, '-p', self.name])
+        cmd = ['poudriere', 'ports', '-c', '-F', '-f', 'none', '-M',
+            self.ports_path, '-p', self.name]
+        subprocess.check_output(cmd)
         atexit.register(self.__cleanup)
 
     def __del__(self):
