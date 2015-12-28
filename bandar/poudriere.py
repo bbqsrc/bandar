@@ -61,15 +61,13 @@ class Poudriere:
                 proc = subprocess.Popen(['poudriere', 'bulk', '-C', '-j', jail_name,
                     '-p', self.name, '-B', build, '-f', f.name])
                 signal.signal(signal.SIGINFO, lambda sig, _: proc.send_signal(sig))
+                signal.signal(signal.SIGINT, lambda sig, _: proc.send_signal(sig))
                 proc.wait()
             except KeyboardInterrupt:
-                try:
-                    proc.terminate()
-                    proc.wait()
-                except KeyboardInterrupt:
-                    proc.kill()
-                    proc.wait()
+                proc.terminate()
+                proc.wait()
             finally:
                 signal.signal(signal.SIGINFO, signal.SIG_DFL)
+                signal.signal(signal.SIGINT, signal.SIG_DFL)
 
         return build
