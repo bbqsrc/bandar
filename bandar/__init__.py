@@ -97,11 +97,10 @@ class Bandar:
         return p.returncode == 0
 
     def test_ports(self, port_paths):
-        for p in port_paths:
-            check_path(p, self.overlay.mountpoint)
-        for p in port_paths:
+        paths = [check_path(p, self.overlay.mountpoint) for p in port_paths]
+        for p in paths:
             self.__test_port(p)
 
     def test_port(self, port_path):
-        check_path(port_path, self.overlay.mountpoint)
-        self.__test_port(port_path)
+        p = check_path(port_path, self.overlay.mountpoint)
+        self.__test_port(p)
