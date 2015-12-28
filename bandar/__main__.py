@@ -31,31 +31,68 @@ import os.path
 import sys
 
 from bandar import Bandar
+from .archivers import generate_shar, git_list_ports
 
 Target = namedtuple('Target', ['parser', 'handler', 'help', 'needs_overlay'])
 
-DEBUG = True
+DEBUG = False
 logging.basicConfig(level=logging.ERROR if DEBUG is False else logging.DEBUG)
 
 logger = logging.getLogger(os.path.basename(__file__))
 
+def write(*args):
+    sys.stdout.write("".join(args))
+    sys.stdout.flush()
 
 def archive_args(p):
-    p.add_argument('-o', metavar='output', dest='output', required=True,
-        help="Output directory for archive files")
-    p.add_argument('packages', nargs='*',
-        help="Packages to be archive'd (default: all)")
+    p.add_argument('-o', metavar='path', dest='output_path',
+        help='Output path (default: relevant port directory)')
+    p.add_argument('ports', nargs='+',
+        help="Ports to be archived, provide 'all' to generate all")
     return p
 
-def archive_handler(args, bandar):
-    pass
+def archive_handler(args):
+    out = None
+
+    if args.output_path is not None:
+        os.makedirs(args.output_path, exist_ok=True)
+        out = args.output_path
+
+    if args.ports[0] == 'all':
+        ports = git_list_ports(args.dev_path)
+    else:
+        ports = args.ports
+
+    for port in ports:
+        fn = '%s.shar' % port.replace("/", "_")
+        write('[-] ', port, " -> ")
+        if out is None:
+            shar_path = os.path.join(args.dev_path, port, fn)
+        else:
+            shar_path = os.path.join(out, fn)
+        generate_shar(args.dev_path, port, shar_path)
+        print(shar_path)
 
 def check_git_args(p):
     return p
 
 def check_git_handler(args):
-    print("All good!")
-    # TODO check .gitignore contains `work` directories and `.` files
+    ignore_fn = os.path.join(args.dev_path, '.gitignore')
+
+    reqs = {'work'}
+    if not os.path.isfile(ignore_fn):
+        print("[!] WARN: You have no .gitignore file!")
+    else:
+        with open(ignore_fn) as f:
+            for line in f:
+                if line in reqs:
+                    reqs.remove(line)
+    if len(reqs) > 0:
+        print("[-] For best results, add the following to your .gitignore:")
+        print("\n".join(sorted(reqs)))
+        return 1
+
+    print("Optimal repository configuration!")
 
 def diff_args(p):
     return p
@@ -70,16 +107,18 @@ def poudriere_handler(args, bandar):
     pass
 
 def test_args(p):
-    p.add_argument('packages', nargs='*',
-        help="Packages to be tested (default: all)")
+    p.add_argument('ports', nargs='+',
+        help="Ports to be tested, provide 'all' to test all")
     return p
 
 def test_handler(args, bandar):
-    if len(args.packages) > 0:
-        bandar.test_ports(args.packages)
-        print("Please wait, unmounting overlay...", file=sys.stderr)
+    if args.ports[0] == 'all':
+        ports = git_list_ports(args.dev_path)
     else:
-        print("TODO: gen all pkgs")
+        ports = args.ports
+
+    bandar.test_ports(ports)
+    print("Please wait, unmounting overlay...", file=sys.stderr)
 
 commands = {
     'archive': Target(archive_args, archive_handler,
@@ -87,18 +126,19 @@ commands = {
         False),
     'diff': Target(diff_args, diff_handler, 'Generate diff patches', False),
     'poudriere': Target(poudriere_args, poudriere_handler,
-        'Run poudriere on ports', True),
-    'test': Target(test_args, test_handler, 'Run `port test` on ports', True),
+        'Run `poudriere` on development ports', True),
+    'test': Target(test_args, test_handler,
+        'Run `port test` on development ports', True),
     'check-git': Target(check_git_args, check_git_handler,
         'Check your git repo is configured optimally', False)
 }
 
 p = argparse.ArgumentParser(prog='bandar')
 
-p.add_argument('-d', metavar='dev-ports', dest='dir',
+p.add_argument('-d', metavar='dev-ports-path', dest='dev_path',
     default=os.getcwd(),
-    help='Directory of project ports (default: current working dir)')
-p.add_argument('-p', metavar='ports', dest='ports',
+    help='Directory of project ports (default: current working directory)')
+p.add_argument('-p', metavar='ports-path', dest='ports_path',
     default='/usr/ports',
     help='Directory of upstream ports (default: /usr/ports)')
 
@@ -117,7 +157,7 @@ cmd = commands[args.command]
 
 try:
     if cmd.needs_overlay:
-        bandar = Bandar(args.dir, args.ports)
+        bandar = Bandar(args.dev_path, args.ports_path)
         ret = cmd.handler(args, bandar)
     else:
         ret = cmd.handler(args)
@@ -125,7 +165,7 @@ try:
 except KeyboardInterrupt:
     sys.exit(0)
 except ValueError as e:
-    print(e)
+    print("ERROR: %s" % e)
     sys.exit(1)
 except Exception as e:
     print("An unknown error occurred.")
