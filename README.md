@@ -24,6 +24,14 @@ optional arguments:
   -p ports-path         Directory of upstream ports (default: /usr/ports)
 ```
 
+## Requirements
+
+* `devel/git`
+* `lang/python32` or greater
+* `ports-mgmt/porttools`
+* `ports-mgmt/poudriere`
+* `sysutils/fusefs-unionfs>=1.0`
+
 ## License
 
 BSD 2-clause. See LICENSE.
