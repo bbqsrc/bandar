@@ -43,7 +43,10 @@ def check_path(path):
 class Overlay:
     def __del__(self):
         logging.debug("__del__ %r" % self)
-        subprocess.check_output(['umount', self.mountpoint.name])
+        try:
+            subprocess.check_output(['umount', self.mountpoint.name])
+        except OSError as e:
+            pass
 
     def __init__(self, layers, workspace=None, mountpoint=None, max_files=65536):
         ufs_layers = self.gen_layers(layers)
@@ -78,8 +81,8 @@ class Bandar:
         for p in port_paths:
             check_path(p)
         for p in port_paths:
-            self._test_port(p)
+            self.__test_port(p)
 
     def test_port(self, port_path):
         check_path(port_path)
-        self._test_port(port_path)
+        self.__test_port(port_path)
