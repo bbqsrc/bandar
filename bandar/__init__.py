@@ -41,7 +41,7 @@ def extend_env(**kwargs):
 
 def check_path(path, rel=None):
     if rel is not None:
-        path = os.path.relpath(path, rel)
+        path = os.path.join(rel, path)
     abspath = os.path.abspath(path)
     if os.path.isdir(abspath):
         return abspath
