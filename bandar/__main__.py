@@ -133,43 +133,47 @@ commands = {
         'Check your git repo is configured optimally', False)
 }
 
-p = argparse.ArgumentParser(prog='bandar')
+def main():
+    p = argparse.ArgumentParser(prog='bandar')
 
-p.add_argument('-d', metavar='dev-ports-path', dest='dev_path',
-    default=os.getcwd(),
-    help='Directory of project ports (default: current working directory)')
-p.add_argument('-p', metavar='ports-path', dest='ports_path',
-    default='/usr/ports',
-    help='Directory of upstream ports (default: /usr/ports)')
+    p.add_argument('-d', metavar='dev-ports-path', dest='dev_path',
+        default=os.getcwd(),
+        help='Directory of project ports (default: current working directory)')
+    p.add_argument('-p', metavar='ports-path', dest='ports_path',
+        default='/usr/ports',
+        help='Directory of upstream ports (default: /usr/ports)')
 
-sub = p.add_subparsers(dest='command')
-for k, target in sorted(commands.items()):
-    target.parser(sub.add_parser(k, help=target.help))
+    sub = p.add_subparsers(dest='command')
+    for k, target in sorted(commands.items()):
+        target.parser(sub.add_parser(k, help=target.help))
 
-args = p.parse_args()
-logger.debug(args)
+    args = p.parse_args()
+    logger.debug(args)
 
-if args.command is None:
-    p.print_help()
-    sys.exit(0)
+    if args.command is None:
+        p.print_help()
+        sys.exit(0)
 
-cmd = commands[args.command]
+    cmd = commands[args.command]
 
-try:
-    if cmd.needs_overlay:
-        bandar = Bandar(args.dev_path, args.ports_path)
-        ret = cmd.handler(args, bandar)
-    else:
-        ret = cmd.handler(args)
-    sys.exit(0 if ret is None else ret)
-except KeyboardInterrupt:
-    sys.exit(0)
-except ValueError as e:
-    print("ERROR: %s" % e)
-    sys.exit(1)
-except Exception as e:
-    print("An unknown error occurred.")
-    if DEBUG:
-        raise e
-    print(e)
-    sys.exit(2)
+    try:
+        if cmd.needs_overlay:
+            bandar = Bandar(args.dev_path, args.ports_path)
+            ret = cmd.handler(args, bandar)
+        else:
+            ret = cmd.handler(args)
+        sys.exit(0 if ret is None else ret)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except ValueError as e:
+        print("ERROR: %s" % e)
+        sys.exit(1)
+    except Exception as e:
+        print("An unknown error occurred.")
+        if DEBUG:
+            raise e
+        print(e)
+        sys.exit(2)
+
+if __name__ == "__main__":
+    main()
