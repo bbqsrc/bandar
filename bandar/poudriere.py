@@ -28,10 +28,10 @@ from tempfile import NamedTemporaryFile
 import uuid
 
 class Poudriere:
-    def __init__(self, name, ports_path):
+    def __init__(self, ports_path, name=None):
         self.__cleaned = False
 
-        self.name = name
+        self.name = name or uuid.uuid4().hex
         self.ports_path = ports_path
         subprocess.check_output(['poudriere', 'ports', '-c', '-F', '-f',
             'none', '-M', ports_path, '-p', name])
