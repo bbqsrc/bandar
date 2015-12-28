@@ -1,6 +1,15 @@
 # bandar
 
-Create development overlays for the ports tree
+Create development overlays for the ports tree.
+
+Bandar creates a temporary unionfs overlay with your development tree on top
+and the upstream ports tree on the bottom, allowing you to quickly and easily
+test, development and deploy new ports. Bandar takes advantage of the
+fuse-based unionfs copy-on-write feature unavailable in the kernel variant,
+and provides extra security and stability by running in userspace.
+
+The word ["bandar"](https://en.wikipedia.org/wiki/Bandar_(port)) is Persian for
+a port or haven, etymologically meaning an enclosed area.
 
 ## Usage
 
