@@ -39,7 +39,9 @@ def extend_env(**kwargs):
     return env
 
 
-def check_path(path):
+def check_path(path, rel=None):
+    if rel is not None:
+        path = os.path.relpath(path, rel)
     abspath = os.path.abspath(path)
     if os.path.isdir(abspath):
         return abspath
@@ -96,10 +98,10 @@ class Bandar:
 
     def test_ports(self, port_paths):
         for p in port_paths:
-            check_path(p)
+            check_path(p, self.overlay.mountpoint)
         for p in port_paths:
             self.__test_port(p)
 
     def test_port(self, port_path):
-        check_path(port_path)
+        check_path(port_path, self.overlay.mountpoint)
         self.__test_port(port_path)
