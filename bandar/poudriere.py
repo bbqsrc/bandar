@@ -23,6 +23,7 @@
 # SUCH DAMAGE.
 
 import atexit
+import signal
 import subprocess
 from tempfile import NamedTemporaryFile
 import uuid
@@ -55,7 +56,20 @@ class Poudriere:
             for arg in args:
                 f.write("%s\n" % arg)
             f.flush()
-            subprocess.call(['poudriere', 'bulk', '-C', '-j', jail_name,
-                '-p', self.name, '-B', build, '-f', f.name])
+            
+            try:
+                proc = subprocess.Popen(['poudriere', 'bulk', '-C', '-j', jail_name,
+                    '-p', self.name, '-B', build, '-f', f.name])
+                signal.signal(signal.SIGINFO, lambda sig, _: proc.send_signal(sig))
+                proc.wait()
+            except KeyboardInterrupt:
+                proc.terminate()
+                try:
+                    proc.wait()
+                except KeyboardInterrupt:
+                    proc.kill()
+                    proc.wait()
+            finally:
+                signal.signal(signal.SIGINFO, signal.SIG_DFL)
 
         return build
