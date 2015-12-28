@@ -101,10 +101,19 @@ def diff_handler(args):
     pass
 
 def poudriere_args(p):
+    p.add_argument('-j', metavar='jail', dest='jail', required=True,
+        help='Jail to use for build')
+    p.add_argument('ports', nargs='+',
+        help="Ports to be archived, provide 'all' to generate all")
     return p
 
 def poudriere_handler(args, bandar):
-    pass
+    if args.ports[0] == 'all':
+        ports = git_list_ports(args.dev_path)
+    else:
+        ports = args.ports
+
+    print(bandar.bulk_build(args.jail, ports))
 
 def test_args(p):
     p.add_argument('ports', nargs='+',

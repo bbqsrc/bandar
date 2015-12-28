@@ -30,6 +30,8 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 
+from .poudriere import Poudriere
+
 logger = logging.getLogger(os.path.basename(__file__))
 
 
@@ -107,3 +109,7 @@ class Bandar:
     def test_port(self, port_path):
         p = check_path(port_path, self.overlay.mountpoint)
         self.__test_port(p)
+
+    def bulk_build(self, jail_name, ports):
+        p = Poudriere(self.overlay.mountpoint)
+        return p.bulk(jail_name, *ports)
