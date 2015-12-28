@@ -33,7 +33,7 @@ class Poudriere:
 
         self.name = name or uuid.uuid4().hex
         self.ports_path = ports_path
-        
+
         subprocess.check_output(['poudriere', 'ports', '-c', '-F', '-f',
             'none', '-M', self.ports_path, '-p', self.name])
         atexit.register(self.__cleanup)
@@ -50,7 +50,7 @@ class Poudriere:
     def bulk(self, jail_name, *args):
         build = uuid.uuid4().hex
 
-        with NamedTemporaryFile(prefix='bandar-poudriere-%s-' % build) as f:
+        with NamedTemporaryFile('w', prefix='bandar-bulk-%s-' % build) as f:
             for arg in args:
                 f.write("%s\n" % arg)
             f.flush()
