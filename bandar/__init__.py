@@ -58,7 +58,7 @@ class Overlay:
     def __del__(self):
         logging.debug("__del__ %r" % self)
         try:
-            subprocess.check_output(['umount', self.mountpoint.name])
+            subprocess.check_output(['umount', self.mountpoint])
         except OSError as e:
             pass
 
