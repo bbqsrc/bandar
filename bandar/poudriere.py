@@ -56,15 +56,15 @@ class Poudriere:
             for arg in args:
                 f.write("%s\n" % arg)
             f.flush()
-            
+
             try:
                 proc = subprocess.Popen(['poudriere', 'bulk', '-C', '-j', jail_name,
                     '-p', self.name, '-B', build, '-f', f.name])
                 signal.signal(signal.SIGINFO, lambda sig, _: proc.send_signal(sig))
                 proc.wait()
             except KeyboardInterrupt:
-                proc.terminate()
                 try:
+                    proc.terminate()
                     proc.wait()
                 except KeyboardInterrupt:
                     proc.kill()

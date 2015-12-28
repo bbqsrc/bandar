@@ -81,7 +81,7 @@ class Overlay:
 
     def __unmount(self):
         atexit.unregister(self.__unmount)
-        subprocess.call(['umount', self.mountpoint])
+        subprocess.call(['umount', '-f', self.mountpoint])
         self.__unmounted = True
 
     def __gen_layers(self, layers):
