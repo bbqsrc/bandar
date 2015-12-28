@@ -57,13 +57,6 @@ class Overlay:
     def mountpoint(self):
         return self._mountpoint.name
 
-    def __del__(self):
-        logging.debug("__del__ %r" % self)
-        try:
-            subprocess.check_output(['umount', self.mountpoint])
-        except OSError as e:
-            pass
-
     def __init__(self, layers, workspace=None, mountpoint=None, max_files=65536):
         ufs_layers = self.__gen_layers(layers)
 
@@ -76,7 +69,14 @@ class Overlay:
         logger.debug(cmd)
 
         subprocess.check_output(cmd)
-        atexit.register(self.__del__)
+        atexit.register(self.__unmount)
+
+    def __del__(self):
+        self.__unmount()
+
+    def __unmount(self):
+        subprocess.check_output(['umount', self.mountpoint])
+        atexit.unregister(self.__unmount)
 
     def __gen_layers(self, layers):
         abslayers = ["%s=RO" % check_path(layer) for layer in layers]
