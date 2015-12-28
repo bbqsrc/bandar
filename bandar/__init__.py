@@ -33,6 +33,12 @@ from tempfile import TemporaryDirectory
 logger = logging.getLogger(os.path.basename(__file__))
 
 
+def extend_env(**kwargs):
+    env = os.environ.copy()
+    env.update(kwargs)
+    return env
+
+
 def check_path(path):
     abspath = os.path.abspath(path)
     if os.path.isdir(abspath):
@@ -41,6 +47,14 @@ def check_path(path):
 
 
 class Overlay:
+    @property
+    def workspace(self):
+        return self._workspace.name
+
+    @property
+    def mountpoint(self):
+        return self._mountpoint.name
+
     def __del__(self):
         logging.debug("__del__ %r" % self)
         try:
@@ -49,20 +63,20 @@ class Overlay:
             pass
 
     def __init__(self, layers, workspace=None, mountpoint=None, max_files=65536):
-        ufs_layers = self.gen_layers(layers)
+        ufs_layers = self.__gen_layers(layers)
 
-        self.workspace = workspace or TemporaryDirectory(prefix="bandar-work")
-        self.mountpoint = mountpoint or TemporaryDirectory(prefix="bandar-mnt")
+        self._workspace = workspace or TemporaryDirectory(prefix="bandar-work")
+        self._mountpoint = mountpoint or TemporaryDirectory(prefix="bandar-mnt")
 
         cmd = ['unionfs', '-o', 'cow,max_files=%s' % max_files,
-                "%s=RW:%s" % (self.workspace.name, ufs_layers),
-                self.mountpoint.name]
+                "%s=RW:%s" % (self.workspace, ufs_layers),
+                self.mountpoint]
         logger.debug(cmd)
 
         subprocess.check_output(cmd)
         atexit.register(self.__del__)
 
-    def gen_layers(self, layers):
+    def __gen_layers(self, layers):
         abslayers = ["%s=RO" % check_path(layer) for layer in layers]
         return ":".join(abslayers)
 
@@ -75,7 +89,8 @@ class Bandar:
 
     def __test_port(self, port_path):
         cmd = ['port', 'test']
-        p = subprocess.call(cmd, cwd=port_path)
+        env = extend_env(PORTSDIR=self.overlay.mountpoint)
+        p = subprocess.call(cmd, cwd=port_path, env=env)
         p.wait()
         return p.returncode == 0
 
