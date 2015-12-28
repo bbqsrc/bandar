@@ -60,8 +60,8 @@ class Overlay:
     def __init__(self, layers, workspace=None, mountpoint=None, max_files=65536):
         ufs_layers = self.__gen_layers(layers)
 
-        self._workspace = workspace or TemporaryDirectory(prefix="bandar-work")
-        self._mountpoint = mountpoint or TemporaryDirectory(prefix="bandar-mnt")
+        self._workspace = workspace or TemporaryDirectory(prefix="bandar-work-")
+        self._mountpoint = mountpoint or TemporaryDirectory(prefix="bandar-mnt-")
 
         cmd = ['unionfs', '-o', 'cow,max_files=%s' % max_files,
                 "%s=RW:%s" % (self.workspace, ufs_layers),

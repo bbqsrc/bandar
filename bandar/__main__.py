@@ -24,6 +24,7 @@
 
 import argparse
 import atexit
+from collections import namedtuple
 import logging
 import os
 import os.path
@@ -31,54 +32,96 @@ import sys
 
 from bandar import Bandar
 
+Target = namedtuple('Target', ['parser', 'handler', 'help', 'needs_overlay'])
+
 DEBUG = True
 logging.basicConfig(level=logging.ERROR if DEBUG is False else logging.DEBUG)
 
 logger = logging.getLogger(os.path.basename(__file__))
 
-def check_git(dir):
+
+def archive_args(p):
+    p.add_argument('-o', metavar='output', dest='output', required=True,
+        help="Output directory for archive files")
+    p.add_argument('packages', nargs='*',
+        help="Packages to be archive'd (default: all)")
+    return p
+
+def archive_handler(args, bandar):
+    pass
+
+def check_git_args(p):
+    return p
+
+def check_git_handler(args):
     print("All good!")
     # TODO check .gitignore contains `work` directories and `.` files
-    return 0
+
+def diff_args(p):
+    return p
+
+def diff_handler(args):
+    pass
+
+def poudriere_args(p):
+    return p
+
+def poudriere_handler(args, bandar):
+    pass
+
+def test_args(p):
+    p.add_argument('packages', nargs='*',
+        help="Packages to be tested (default: all)")
+    return p
+
+def test_handler(args, bandar):
+    if len(args.packages) > 0:
+        bandar.test_ports(args.packages)
+        print("Please wait, unmounting overlay...", file=sys.stderr)
+    else:
+        print("TODO: gen all pkgs")
 
 commands = {
-    'shar': None,
-    'poudriere': None,
-    'test': None,
-    'help': None,
-    'check-git': None
+    'archive': Target(archive_args, archive_handler,
+        'Generate archive files, only files committed to git will be detected',
+        False),
+    'diff': Target(diff_args, diff_handler, 'Generate diff patches', False),
+    'poudriere': Target(poudriere_args, poudriere_handler,
+        'Run poudriere on ports', True),
+    'test': Target(test_args, test_handler, 'Run `port test` on ports', True),
+    'check-git': Target(check_git_args, check_git_handler,
+        'Check your git repo is configured optimally', False)
 }
 
 p = argparse.ArgumentParser(prog='bandar')
 
-p.add_argument('-d', '--directory', metavar='dev-ports', dest='dir',
+p.add_argument('-d', metavar='dev-ports', dest='dir',
     default=os.getcwd(),
     help='Directory of project ports (default: current working dir)')
-p.add_argument('-p', '--ports-dir', metavar='ports', dest='ports',
+p.add_argument('-p', metavar='ports', dest='ports',
     default='/usr/ports',
     help='Directory of upstream ports (default: /usr/ports)')
-p.add_argument('command',
-    help="Command to run. (%s)" % ", ".join(sorted(commands.keys())))
-p.add_argument('packages', nargs='*',
-    help='Packages to run command upon (default: all)')
+
+sub = p.add_subparsers(dest='command')
+for k, target in sorted(commands.items()):
+    target.parser(sub.add_parser(k, help=target.help))
 
 args = p.parse_args()
 logger.debug(args)
-cmd = args.command
-pkgs = args.packages
 
-if cmd == 'help':
-    if len(pkgs) == 0:
-        print("You must provide a command to receive help.")
-        sys.exit(1)
-    print("No help for '%s'." % pkgs[0])
+if args.command is None:
+    p.print_help()
     sys.exit(0)
 
-elif cmd == 'check-git':
-    sys.exit(check_git(args.dir))
+cmd = commands[args.command]
 
 try:
-    bandar = Bandar(args.dir, args.ports)
+    if cmd.needs_overlay:
+        bandar = Bandar(args.dir, args.ports)
+        ret = cmd.handler(args, bandar)
+    else:
+        ret = cmd.handler(args)
+    sys.exit(0 if ret is None else ret)
 except KeyboardInterrupt:
     sys.exit(0)
 except ValueError as e:
@@ -90,14 +133,3 @@ except Exception as e:
         raise e
     print(e)
     sys.exit(2)
-
-if cmd == 'test':
-    if len(pkgs) > 0:
-        bandar.test_ports(pkgs)
-        print("Please wait, unmounting overlay...")
-        sys.exit(0)
-    else:
-        print("TODO: gen all pkgs")
-
-print("Command '%s' unknown." % cmd)
-sys.exit(1)
