@@ -23,6 +23,7 @@
 # SUCH DAMAGE.
 
 import argparse
+import atexit
 import logging
 import os
 import os.path
@@ -77,6 +78,7 @@ elif cmd == 'check-git':
     sys.exit(check_git(args.dir))
 
 try:
+    atexit.register(lambda x: print("Please wait, unmounting overlay..."))
     bandar = Bandar(args.dir, args.ports)
 except KeyboardInterrupt:
     sys.exit(0)

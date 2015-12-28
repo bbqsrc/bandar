@@ -77,7 +77,6 @@ class Overlay:
     def __unmount(self):
         atexit.unregister(self.__unmount)
         p = subprocess.call(['umount', self.mountpoint])
-        p.wait()
 
     def __gen_layers(self, layers):
         abslayers = ["%s=RO" % check_path(layer) for layer in layers]
