@@ -33,8 +33,9 @@ class Poudriere:
 
         self.name = name or uuid.uuid4().hex
         self.ports_path = ports_path
+        
         subprocess.check_output(['poudriere', 'ports', '-c', '-F', '-f',
-            'none', '-M', ports_path, '-p', name])
+            'none', '-M', self.ports_path, '-p', self.name])
         atexit.register(self.__cleanup)
 
     def __del__(self):

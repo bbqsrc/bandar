@@ -175,10 +175,10 @@ def main():
     except KeyboardInterrupt:
         sys.exit(0)
     except ValueError as e:
-        print("ERROR: %s" % e)
+        print("[!] ERROR: %s" % e)
         sys.exit(1)
     except Exception as e:
-        print("An unknown error occurred.")
+        print("[!] An unknown error occurred!")
         if DEBUG:
             raise e
         print(e)
