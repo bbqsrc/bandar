@@ -92,9 +92,8 @@ class Bandar:
     def __test_port(self, port_path):
         cmd = ['port', 'test']
         env = extend_env(PORTSDIR=self.overlay.mountpoint)
-        p = subprocess.call(cmd, cwd=port_path, env=env)
-        p.wait()
-        return p.returncode == 0
+        ret = subprocess.call(cmd, cwd=port_path, env=env)
+        return ret == 0
 
     def test_ports(self, port_paths):
         paths = [check_path(p, self.overlay.mountpoint) for p in port_paths]

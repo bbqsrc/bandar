@@ -78,7 +78,6 @@ elif cmd == 'check-git':
     sys.exit(check_git(args.dir))
 
 try:
-    atexit.register(lambda x: print("Please wait, unmounting overlay..."))
     bandar = Bandar(args.dir, args.ports)
 except KeyboardInterrupt:
     sys.exit(0)
@@ -95,6 +94,7 @@ except Exception as e:
 if cmd == 'test':
     if len(pkgs) > 0:
         bandar.test_ports(pkgs)
+        print("Please wait, unmounting overlay...")
         sys.exit(0)
     else:
         print("TODO: gen all pkgs")
