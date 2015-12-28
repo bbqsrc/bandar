@@ -69,14 +69,18 @@ class Overlay:
         logger.debug(cmd)
 
         subprocess.check_output(cmd)
+
+        self.__unmounted = False
         atexit.register(self.__unmount)
 
     def __del__(self):
-        self.__unmount()
+        if self.__unmounted is False:
+            self.__unmount()
 
     def __unmount(self):
         atexit.unregister(self.__unmount)
-        p = subprocess.call(['umount', self.mountpoint])
+        subprocess.call(['umount', self.mountpoint])
+        self.__unmounted = True
 
     def __gen_layers(self, layers):
         abslayers = ["%s=RO" % check_path(layer) for layer in layers]
