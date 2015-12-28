@@ -75,7 +75,9 @@ class Bandar:
 
     def __test_port(self, port_path):
         cmd = ['port', 'test']
-        return subprocess.check_output(cmd, cwd=port_path)
+        p = subprocess.call(cmd, cwd=port_path)
+        p.wait()
+        return p.returncode == 0
 
     def test_ports(self, port_paths):
         for p in port_paths:
