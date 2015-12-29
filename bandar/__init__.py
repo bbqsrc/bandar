@@ -122,7 +122,7 @@ class Bandar:
         cmd = ['portlint'] + list(args) + [port_path]
         env = extend_env(PORTSDIR=self.overlay.mountpoint)
         data = subprocess.check_output(cmd, cwd=self.overlay.mountpoint, env=env)
-        results = data.encode().strip().split('\n')
+        results = data.decode().strip().split('\n')
 
         out = LintResult(warnings=[x for x in results if x.startswith("WARN")],
                          errors=[x for x in results if x.startswith("WARN")])
