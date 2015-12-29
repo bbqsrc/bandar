@@ -187,8 +187,8 @@ def print_tree(nodes, depth=-1, prefix=None):
             print('%s %s%s%s' % (''.join(prefix), leaf_end(), leaf_arm(), node[0]))
             p.append('   ')
         else:
-            print('% s%s%s%s' % (''.join(prefix), leaf(), leaf_arm(), node[0]))
-            p.append('  %s ' % pipe())
+            print('%s %s%s%s' % (''.join(prefix), leaf(), leaf_arm(), node[0]))
+            p.append(' %s ' % pipe())
 
         print_tree(node[1], depth + 1, p)
 
