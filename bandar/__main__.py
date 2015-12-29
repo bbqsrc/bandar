@@ -168,10 +168,10 @@ def print_tree(nodes, depth=0):
         if depth == 0:
             print(node[0])
             print_tree(node[1], depth + 1)
-        elif last:
-            print('%s%s' % ('  ' * depth, leaf_end()))
+        elif i == last:
+            print('%s%s%s' % ('  ' * depth, leaf_end(), node[0]))
         else:
-            print('%s%s' % ('  ' * depth, leaf()))
+            print('%s%s%s' % ('  ' * depth, leaf(), node[0]))
 
 def tree_handler(args, bandar):
     port = args.port
