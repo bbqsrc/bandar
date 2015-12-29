@@ -123,7 +123,16 @@ class Bandar:
         cmd = ['portlint'] + list(args) + [port_path]
         env = extend_env(PORTSDIR=mnt)
 
-        data = subprocess.check_output(cmd, cwd=mnt, env=env)
+        try:
+            data = subprocess.check_output(cmd, cwd=mnt, env=env)
+        except subprocess.CalledProcessError as e:
+            # if 1, just means linting found an error
+            if e.returncode == 1:
+                data = output
+            else:
+                # Otherwise, propagate
+                raise e
+        
         results = data.decode().strip().split('\n')
 
         out = LintResult(
