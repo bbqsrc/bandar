@@ -150,11 +150,22 @@ def tree_args(p):
     p.add_argument('port', help="Port for which a tree shall be printed")
     return p
 
+def print_tree(nodes, depth=0):
+    last = len(nodes) - 1
+    for i, node in enumerate(nodes):
+        if depth == 0:
+            print(node[0])
+            print_tree(node[1], depth + 1)
+        elif last:
+            print('%s└' % ('  ' * depth))
+        else:
+            print('%s├' % ('  ' * depth))
+
 def tree_handler(args, bandar):
     port = args.port
     tree = bandar.generate_dependency_tree(port)
 
-    print(tree)
+    print_tree(tree)
 
     print("Please wait, unmounting overlay...", file=sys.stderr)
 

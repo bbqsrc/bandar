@@ -33,7 +33,7 @@ from tempfile import TemporaryDirectory
 
 from .poudriere import Poudriere
 
-logger = logging.getLogger(os.path.basename(__file__))
+logger = logging.getLogger(os.path.basename('bandar'))
 
 
 LintResult = namedtuple('LintResult', ['warnings', 'errors'])
@@ -77,9 +77,13 @@ class TreeGenerator:
         ports = data.decode().strip()
 
         if ports == '':
+            logger.debug('%s: <end>' % port_path)
             return root
 
-        for port in ports.split('\n'):
+        ports = ports.split('\n')
+        logger.debug("%s: %r" % (port_path, ports))
+
+        for port in ports:
             # Strip mnt prefix
             port = self.strip_mount(port)
             root.append((port, self.run(port)))
