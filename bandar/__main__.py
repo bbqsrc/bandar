@@ -53,6 +53,18 @@ def failure():
         return "\u2718"
     return "FAIL"
 
+def leaf():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "├"
+    return "-"
+
+def leaf_end():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "└"
+    return "-"
+
 def write(*args):
     sys.stdout.write("".join(args))
     sys.stdout.flush()
@@ -157,9 +169,9 @@ def print_tree(nodes, depth=0):
             print(node[0])
             print_tree(node[1], depth + 1)
         elif last:
-            print('%s└' % ('  ' * depth))
+            print('%s%s' % ('  ' * depth, leaf_end()))
         else:
-            print('%s├' % ('  ' * depth))
+            print('%s%s' % ('  ' * depth, leaf()))
 
 def tree_handler(args, bandar):
     port = args.port
