@@ -58,7 +58,7 @@ class TreeGenerator:
     def __init__(self, bandar):
         self.cache = {}
         self.mnt = bandar.overlay.mountpoint
-        self.mnt_len = len(mnt) + 1
+        self.mnt_len = len(self.mnt) + 1
         self.cmd = ['make', 'run-depends-list']
         self.env = extend_env(PORTSDIR=self.mnt)
 
