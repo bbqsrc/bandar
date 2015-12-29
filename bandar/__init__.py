@@ -23,6 +23,7 @@
 # SUCH DAMAGE.
 
 import atexit
+from collections import namedtuple
 import logging
 import os
 import os.path
@@ -33,6 +34,9 @@ from tempfile import TemporaryDirectory
 from .poudriere import Poudriere
 
 logger = logging.getLogger(os.path.basename(__file__))
+
+
+LintResult = namedtuple('LintResult', ['warnings', 'errors'])
 
 
 def extend_env(**kwargs):
@@ -117,5 +121,10 @@ class Bandar:
     def lint_port(self, port_path, *args):
         cmd = ['portlint'] + list(args)
         env = extend_env(PORTSDIR=self.overlay.mountpoint)
-        ret = subprocess.call(cmd, cwd=port_path, env=env)
-        return ret == 0
+        data = subprocess.check_output(cmd, cwd=port_path, env=env)
+        results = data.encode().strip().split('\n')
+
+        out = LintResult(warnings=[x for x in results if x.startswith("WARN")],
+                         errors=[x for x in results if x.startswith("WARN")])
+
+        return out

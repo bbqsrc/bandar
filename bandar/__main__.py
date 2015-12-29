@@ -141,8 +141,14 @@ def lint_handler(args, bandar):
         ports = args.ports
 
     for port in ports:
-        print('[-] %s' % port)
-        bandar.lint_port(port, '-AC')
+        write('[-] %s -> ' % port)
+        res = bandar.lint_port(port, '-AC')
+        if len(res.warnings) or len(res.errors):
+            print("\u2718")
+            print("\n".join(res.errors))
+            print("\n".join(res.warnings))
+        else:
+            print("\u2713")
 
     print("Please wait, unmounting overlay...", file=sys.stderr)
 
