@@ -82,7 +82,7 @@ class TreeGenerator:
         for port in ports.split('\n'):
             # Strip mnt prefix
             port = self.strip_mount(port)
-            root.append((port, self.generate_dependency_tree(port)))
+            root.append((port, self.run(port)))
 
         self.cache[port_path] = root
         return root
