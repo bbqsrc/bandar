@@ -58,8 +58,14 @@ class TreeGenerator:
     def __init__(self, bandar):
         self.cache = {}
         self.mnt = bandar.overlay.mountpoint
+        self.mnt_len = len(mnt) + 1
         self.cmd = ['make', 'run-depends-list']
         self.env = extend_env(PORTSDIR=self.mnt)
+
+    def strip_mount(self, path):
+        if path.startswith(self.mnt):
+            return path[self.mnt_len:]
+        return path
 
     def run(self, port_path):
         if port_path in self.cache:
@@ -75,8 +81,7 @@ class TreeGenerator:
 
         for port in ports.split('\n'):
             # Strip mnt prefix
-            if port.startswith(mnt):
-                port = port[len(mnt)+1:]
+            port = self.strip_mount(port)
             root.append((port, self.generate_dependency_tree(port)))
 
         self.cache[port_path] = root
