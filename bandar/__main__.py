@@ -196,7 +196,7 @@ def tree_handler(args, bandar):
     port = args.port
     tree = bandar.generate_dependency_tree(port)
 
-    print_tree(tree)
+    print_tree([(port, tree)])
 
     print("Please wait, unmounting overlay...", file=sys.stderr)
 
