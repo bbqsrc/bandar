@@ -90,6 +90,10 @@ def check_git_args(p):
     return p
 
 def check_git_handler(args):
+    if not os.path.isdir(os.path.join(args.dev_path, '.git')):
+        print("[!] ERROR: '%s' is not a git repository." % args.dev_path)
+        return 2
+
     ignore_fn = os.path.join(args.dev_path, '.gitignore')
 
     reqs = {'work'}
