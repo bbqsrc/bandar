@@ -25,6 +25,7 @@
 import argparse
 import atexit
 from collections import namedtuple
+import locale
 import logging
 import os
 import os.path
@@ -39,6 +40,18 @@ DEBUG = False
 logging.basicConfig(level=logging.ERROR if DEBUG is False else logging.DEBUG)
 
 logger = logging.getLogger(os.path.basename(__file__))
+
+def success():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "\u2713"
+    return "PASS"
+
+def failure():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "\u2718"
+    return "FAIL"
 
 def write(*args):
     sys.stdout.write("".join(args))
@@ -144,11 +157,11 @@ def lint_handler(args, bandar):
         write('[-] %s -> ' % port)
         res = bandar.lint_port(port, '-AC')
         if len(res.warnings) or len(res.errors):
-            print("\u2718")
+            print(failure())
             print("\n".join(res.errors))
             print("\n".join(res.warnings))
         else:
-            print("\u2713")
+            print(success())
 
     print("Please wait, unmounting overlay...", file=sys.stderr)
 
