@@ -39,8 +39,9 @@ def git_list_ports(path, *args, **kwargs):
     return list(sorted(o))
 
 def git_ls_files(path, *args, **kwargs):
-    cwd = kwargs.get('cwd', path)
-    data = subprocess.check_output(['git', 'ls-files', '-z', path], cwd=cwd,
+    if 'cwd' not in kwargs:
+        kwargs['cwd'] = path
+    data = subprocess.check_output(['git', 'ls-files', '-z', path],
         *args, **kwargs)
     return [x.decode() for x in data.split(b'\x00')[:-1]]
 
