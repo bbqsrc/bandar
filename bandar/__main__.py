@@ -158,8 +158,7 @@ def lint_handler(args, bandar):
         res = bandar.lint_port(port, '-gAC')
         if len(res.warnings) or len(res.errors):
             print(failure())
-            print("\n".join(res.errors))
-            print("\n".join(res.warnings))
+            print("\n".join(res.errors + res.warnings))
         else:
             print(success())
 
