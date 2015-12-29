@@ -150,12 +150,12 @@ class Bandar:
         env = extend_env(PORTSDIR=mnt)
 
         ports = subprocess.check_output(cmd, cwd=path, env=env)\
-            .decode().strip().split('\n')
+            .decode().strip()
 
         if ports == '':
             return root
-            
-        for port in ports:
+
+        for port in ports.split('\n'):
             # Strip mnt prefix
             if port.startswith(mnt):
                 port = port[len(mnt)+1:]
