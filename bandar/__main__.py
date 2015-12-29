@@ -155,7 +155,7 @@ def lint_handler(args, bandar):
 
     for port in ports:
         write('[-] %s -> ' % port)
-        res = bandar.lint_port(port, '-AC')
+        res = bandar.lint_port(port, '-gAC')
         if len(res.warnings) or len(res.errors):
             print(failure())
             print("\n".join(res.errors))

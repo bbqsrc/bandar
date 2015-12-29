@@ -128,7 +128,7 @@ class Bandar:
         except subprocess.CalledProcessError as e:
             # if 1, just means linting found an error
             if e.returncode == 1:
-                data = output
+                data = e.output
             else:
                 # Otherwise, propagate
                 raise e
@@ -137,6 +137,6 @@ class Bandar:
 
         out = LintResult(
             warnings=[x.replace(mnt + '/', '') for x in results if x.startswith("WARN")],
-            errors=[x.replace(mnt + '/', '') for x in results if x.startswith("WARN")])
+            errors=[x.replace(mnt + '/', '') for x in results if x.startswith("FATAL")])
 
         return out
