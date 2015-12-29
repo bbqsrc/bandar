@@ -15,14 +15,14 @@ a port or haven, etymologically meaning an enclosed area.
 
 ```
 usage: bandar [-h] [-d dev-ports-path] [-p ports-path]
-              {archive,check-git,diff,poudriere,test} ...
+              {archive,check-git,lint,poudriere,test} ...
 
 positional arguments:
-  {archive,check-git,diff,poudriere,test}
+  {archive,check-git,lint,poudriere,test}
     archive             Generate archive files, only files committed to git
                         will be detected
     check-git           Check your git repo is configured optimally
-    diff                Generate diff patches
+    lint                Run `portlint` on development ports
     poudriere           Run `poudriere` on development ports
     test                Run `port test` on development ports
 
