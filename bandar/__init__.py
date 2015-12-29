@@ -113,3 +113,9 @@ class Bandar:
     def bulk_build(self, jail_name, ports):
         p = Poudriere(self.overlay.mountpoint)
         return p.bulk(jail_name, *ports)
+
+    def lint_port(self, port_path, *args):
+        cmd = ['portlint'] + list(args)
+        env = extend_env(PORTSDIR=self.overlay.mountpoint)
+        ret = subprocess.call(cmd, cwd=port_path, env=env)
+        return ret == 0

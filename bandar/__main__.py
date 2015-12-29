@@ -129,11 +129,31 @@ def test_handler(args, bandar):
     bandar.test_ports(ports)
     print("Please wait, unmounting overlay...", file=sys.stderr)
 
+def lint_args(p):
+    p.add_argument('ports', nargs='+',
+        help="Ports to be tested, provide 'all' to test all")
+    return p
+
+def lint_handler(args, bandar):
+    if args.ports[0] == 'all':
+        ports = git_list_ports(args.dev_path)
+    else:
+        ports = args.ports
+
+    for port in ports:
+        print('[-] %s' % port)
+        bandar.lint_port(port, '-AC')
+
+    print("Please wait, unmounting overlay...", file=sys.stderr)
+
 commands = {
     'archive': Target(archive_args, archive_handler,
         'Generate archive files, only files committed to git will be detected',
         False),
-    'diff': Target(diff_args, diff_handler, 'Generate diff patches', False),
+    'diff': Target(diff_args, diff_handler,
+        'Generate diff patches', False),
+    'lint': Target(lint_args, lint_handler,
+        'Run `portlint` on development ports', True),
     'poudriere': Target(poudriere_args, poudriere_handler,
         'Run `poudriere` on development ports', True),
     'test': Target(test_args, test_handler,
