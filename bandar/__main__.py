@@ -197,8 +197,8 @@ def print_tree(nodes, depth=-1, prefix=None):
 def tree_handler(args, bandar):
     port = args.port
     if len(args.excludes) > 0:
-        print("The following ports were not included in the tree:\n  ")
-        print("\n  ".join(args.excludes))
+        print("The following ports were not included in the tree:")
+        print("  %s" % "\n  ".join(args.excludes))
         print()
     tree = bandar.generate_dependency_tree(port, args.excludes)
 
