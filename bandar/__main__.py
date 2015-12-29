@@ -57,12 +57,18 @@ def leaf():
     enc = locale.getlocale()[1]
     if enc is not None and enc.upper() == "UTF-8":
         return "├"
-    return "-"
+    return "|"
 
 def leaf_end():
     enc = locale.getlocale()[1]
     if enc is not None and enc.upper() == "UTF-8":
         return "└"
+    return "\\"
+
+def leaf_arm():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "─"
     return "-"
 
 def write(*args):
@@ -162,16 +168,16 @@ def tree_args(p):
     p.add_argument('port', help="Port for which a tree shall be printed")
     return p
 
-def print_tree(nodes, depth=0):
+def print_tree(nodes, depth=-1):
     last = len(nodes) - 1
     for i, node in enumerate(nodes):
-        if depth == 0:
+        if depth <= 0:
             print(node[0])
             print_tree(node[1], depth + 1)
         elif i == last:
-            print('%s%s%s' % ('  ' * depth, leaf_end(), node[0]))
+            print('%s%s%s%s' % ('  ' * depth, leaf_end(), leaf_arm(), node[0]))
         else:
-            print('%s%s%s' % ('  ' * depth, leaf(), node[0]))
+            print('%s%s%s%s' % ('  ' * depth, leaf(), leaf_arm(), node[0]))
 
 def tree_handler(args, bandar):
     port = args.port
