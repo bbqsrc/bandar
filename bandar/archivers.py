@@ -39,7 +39,8 @@ def git_list_ports(path, *args, **kwargs):
     return list(sorted(o))
 
 def git_ls_files(path, *args, **kwargs):
-    data = subprocess.check_output(['git', 'ls-files', '-z', path], cwd=path,
+    cwd = kwargs.get('cwd', path)
+    data = subprocess.check_output(['git', 'ls-files', '-z', path], cwd=cwd,
         *args, **kwargs)
     return [x.decode() for x in data.split(b'\x00')[:-1]]
 
@@ -48,7 +49,3 @@ def generate_shar(git_root, path, output_path):
     data = subprocess.check_output(['shar'] + files, cwd=git_root)
     with open(output_path, 'wb') as f:
         f.write(data)
-
-class SharArchiver:
-    def __init__(self, git_root, path):
-        files = git_ls_files()
