@@ -146,7 +146,7 @@ class Bandar:
 
         mnt = self.overlay.mountpoint
         path = os.path.join(mnt, port_path)
-        cmd = ['make', 'run-depends']
+        cmd = ['make', 'run-depends-list']
         env = extend_env(PORTSDIR=mnt)
 
         ports = subprocess.check_output(cmd, cwd=mnt, env=env)\
