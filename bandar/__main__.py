@@ -185,10 +185,10 @@ def print_tree(nodes, depth=-1, prefix=None):
             print(node[0])
         elif i == last:
             print('%s%s%s%s' % (''.join(prefix), leaf_end(), leaf_arm(), node[0]))
-            p.append('  ')
+            p.append('   ')
         else:
             print('%s%s%s%s' % (''.join(prefix), leaf(), leaf_arm(), node[0]))
-            p.append('%s ' % pipe())
+            p.append(' %s ' % pipe())
 
         print_tree(node[1], depth + 1, p)
 
