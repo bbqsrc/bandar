@@ -132,11 +132,11 @@ class Bandar:
             else:
                 # Otherwise, propagate
                 raise e
-        
+
         results = data.decode().strip().split('\n')
 
         out = LintResult(
-            warnings=[x.replace(mnt, '') for x in results if x.startswith("WARN")],
-            errors=[x.replace(mnt, '') for x in results if x.startswith("WARN")])
+            warnings=[x.replace(mnt + '/', '') for x in results if x.startswith("WARN")],
+            errors=[x.replace(mnt + '/', '') for x in results if x.startswith("WARN")])
 
         return out
