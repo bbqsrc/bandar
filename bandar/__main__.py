@@ -171,13 +171,14 @@ def tree_args(p):
 def print_tree(nodes, depth=-1):
     last = len(nodes) - 1
     for i, node in enumerate(nodes):
-        if depth <= 0:
+        if depth == -1:
             print(node[0])
-            print_tree(node[1], depth + 1)
         elif i == last:
             print('%s%s%s%s' % ('  ' * depth, leaf_end(), leaf_arm(), node[0]))
         else:
             print('%s%s%s%s' % ('  ' * depth, leaf(), leaf_arm(), node[0]))
+
+        print_tree(node[1], depth + 1)
 
 def tree_handler(args, bandar):
     port = args.port
