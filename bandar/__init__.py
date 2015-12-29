@@ -33,7 +33,7 @@ from tempfile import TemporaryDirectory
 
 from .poudriere import Poudriere
 
-logger = logging.getLogger(os.path.basename(__file__))
+logger = logging.getLogger(os.path.basename('bandar'))
 
 
 LintResult = namedtuple('LintResult', ['warnings', 'errors'])
@@ -53,6 +53,46 @@ def check_path(path, rel=None):
         return abspath
     raise ValueError("The path '%s' does not exist!" % abspath)
 
+
+class TreeGenerator:
+    def __init__(self, bandar, excludes=None):
+        self.excludes = excludes or []
+        self.cache = {}
+        self.mnt = bandar.overlay.mountpoint
+        self.mnt_len = len(self.mnt) + 1
+        self.cmd = ['make', 'run-depends-list']
+        self.env = extend_env(PORTSDIR=self.mnt)
+
+    def strip_mount(self, path):
+        if path.startswith(self.mnt):
+            return path[self.mnt_len:]
+        return path
+
+    def run(self, port_path):
+        if port_path in self.cache:
+            return self.cache[port_path]
+        root = []
+
+        path = os.path.join(self.mnt, port_path)
+        data = subprocess.check_output(self.cmd, cwd=path, env=self.env)
+        ports = data.decode().strip()
+
+        if ports == '':
+            logger.debug('%s: <end>' % port_path)
+            return root
+
+        ports = ports.split('\n')
+        logger.debug("%s: %r" % (port_path, ports))
+
+        for port in ports:
+            # Strip mnt prefix
+            port = self.strip_mount(port)
+            if port in self.excludes:
+                continue
+            root.append((port, self.run(port)))
+
+        self.cache[port_path] = root
+        return root
 
 class Overlay:
     @property
@@ -140,3 +180,6 @@ class Bandar:
             errors=[x.replace(mnt + '/', '') for x in results if x.startswith("FATAL")])
 
         return out
+
+    def generate_dependency_tree(self, port_path, excludes=None):
+        return TreeGenerator(self, excludes).run(port_path)

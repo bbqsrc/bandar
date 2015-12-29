@@ -53,6 +53,30 @@ def failure():
         return "\u2718"
     return "FAIL"
 
+def leaf():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "├"
+    return "|"
+
+def leaf_end():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "└"
+    return "\\"
+
+def leaf_arm():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "─"
+    return "-"
+
+def pipe():
+    enc = locale.getlocale()[1]
+    if enc is not None and enc.upper() == "UTF-8":
+        return "│"
+    return "|"
+
 def write(*args):
     sys.stdout.write("".join(args))
     sys.stdout.flush()
@@ -146,6 +170,42 @@ def test_handler(args, bandar):
     bandar.test_ports(ports)
     print("Please wait, unmounting overlay...", file=sys.stderr)
 
+def tree_args(p):
+    p.add_argument('port', help="Port for which a tree shall be printed")
+    p.add_argument('-x', action='append', metavar='exclude-port', default=[],
+        dest='excludes', help='Ports to be excluded from the tree')
+    return p
+
+def print_tree(nodes, depth=-1, prefix=None):
+    if prefix is None:
+        prefix = []
+
+    last = len(nodes) - 1
+    for i, node in enumerate(nodes):
+        p = prefix[:]
+        if depth == -1:
+            print(node[0])
+        elif i == last:
+            print('%s %s%s%s' % (''.join(prefix), leaf_end(), leaf_arm(), node[0]))
+            p.append('   ')
+        else:
+            print('%s %s%s%s' % (''.join(prefix), leaf(), leaf_arm(), node[0]))
+            p.append(' %s ' % pipe())
+
+        print_tree(node[1], depth + 1, p)
+
+def tree_handler(args, bandar):
+    port = args.port
+    if len(args.excludes) > 0:
+        print("The following ports were not included in the tree:")
+        print("  %s" % "\n  ".join(args.excludes))
+        print()
+    tree = bandar.generate_dependency_tree(port, args.excludes)
+
+    print_tree([(port, tree)])
+
+    print("Please wait, unmounting overlay...", file=sys.stderr)
+
 def lint_args(p):
     p.add_argument('ports', nargs='+',
         help="Ports to be tested, provide 'all' to test all")
@@ -176,6 +236,8 @@ commands = {
     #    'Generate diff patches', False),
     'lint': Target(lint_args, lint_handler,
         'Run `portlint` on development ports', True),
+    'tree': Target(tree_args, tree_handler,
+        'Print dependency tree for a port', True),
     'poudriere': Target(poudriere_args, poudriere_handler,
         'Run `poudriere` on development ports', True),
     'test': Target(test_args, test_handler,
