@@ -172,6 +172,8 @@ def test_handler(args, bandar):
 
 def tree_args(p):
     p.add_argument('port', help="Port for which a tree shall be printed")
+    p.add_argument('-x', action='append', metavar='exclude-port', default=[],
+        dest='excludes', help='Ports to be excluded from the tree')
     return p
 
 def print_tree(nodes, depth=-1, prefix=None):
@@ -194,7 +196,10 @@ def print_tree(nodes, depth=-1, prefix=None):
 
 def tree_handler(args, bandar):
     port = args.port
-    tree = bandar.generate_dependency_tree(port)
+    if args.excludes:
+        print("The following ports were not included in the tree:\n  ")
+        print("\n  %s" % args.excludes)
+    tree = bandar.generate_dependency_tree(port, args.excludes)
 
     print_tree([(port, tree)])
 

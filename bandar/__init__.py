@@ -55,7 +55,8 @@ def check_path(path, rel=None):
 
 
 class TreeGenerator:
-    def __init__(self, bandar):
+    def __init__(self, bandar, excludes=None):
+        self.excludes = excludes or []
         self.cache = {}
         self.mnt = bandar.overlay.mountpoint
         self.mnt_len = len(self.mnt) + 1
@@ -86,6 +87,8 @@ class TreeGenerator:
         for port in ports:
             # Strip mnt prefix
             port = self.strip_mount(port)
+            if port in self.excludes:
+                continue
             root.append((port, self.run(port)))
 
         self.cache[port_path] = root
@@ -178,5 +181,5 @@ class Bandar:
 
         return out
 
-    def generate_dependency_tree(self, port_path):
-        return TreeGenerator(self).run(port_path)
+    def generate_dependency_tree(self, port_path, excludes=None):
+        return TreeGenerator(self, excludes).run(port_path)
