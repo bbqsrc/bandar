@@ -119,12 +119,15 @@ class Bandar:
         return p.bulk(jail_name, *ports)
 
     def lint_port(self, port_path, *args):
+        mnt = self.overlay.mountpoint
         cmd = ['portlint'] + list(args) + [port_path]
-        env = extend_env(PORTSDIR=self.overlay.mountpoint)
-        data = subprocess.check_output(cmd, cwd=self.overlay.mountpoint, env=env)
+        env = extend_env(PORTSDIR=mnt)
+
+        data = subprocess.check_output(cmd, cwd=mnt, env=env)
         results = data.decode().strip().split('\n')
 
-        out = LintResult(warnings=[x for x in results if x.startswith("WARN")],
-                         errors=[x for x in results if x.startswith("WARN")])
+        out = LintResult(
+            warnings=[x.replace(mnt, '') for x in results if x.startswith("WARN")],
+            errors=[x.replace(mnt, '') for x in results if x.startswith("WARN")])
 
         return out
