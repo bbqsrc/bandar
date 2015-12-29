@@ -149,7 +149,7 @@ class Bandar:
         cmd = ['make', 'run-depends']
         env = extend_env(PORTSDIR=mnt)
 
-        ports = subprocess.check_output(cmd, cwd=mnt, env=env)
+        ports = subprocess.check_output(cmd, cwd=mnt, env=env)\
             .decode().strip().split('\n')
 
         for port in ports:
