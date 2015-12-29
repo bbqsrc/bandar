@@ -152,6 +152,9 @@ class Bandar:
         ports = subprocess.check_output(cmd, cwd=path, env=env)\
             .decode().strip().split('\n')
 
+        if ports == '':
+            return root
+            
         for port in ports:
             # Strip mnt prefix
             if port.startswith(mnt):
