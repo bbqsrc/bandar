@@ -155,7 +155,7 @@ class Bandar:
         for port in ports:
             # Strip mnt prefix
             if port.startswith(mnt):
-                port = port[len(mnt):]
+                port = port[len(mnt)+1:]
             root.append((port, self.generate_dependency_tree(port)))
 
         return root
