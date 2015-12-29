@@ -54,6 +54,34 @@ def check_path(path, rel=None):
     raise ValueError("The path '%s' does not exist!" % abspath)
 
 
+class TreeGenerator:
+    def __init__(self, bandar):
+        self.cache = {}
+        self.mnt = bandar.overlay.mountpoint
+        self.cmd = ['make', 'run-depends-list']
+        self.env = extend_env(PORTSDIR=self.mnt)
+
+    def run(self, port_path):
+        if port_path in self.cache:
+            return self.cache[port_path]
+        root = []
+
+        path = os.path.join(self.mnt, port_path)
+        data = subprocess.check_output(self.cmd, cwd=path, env=self.env)
+        ports = data.decode().strip()
+
+        if ports == '':
+            return root
+
+        for port in ports.split('\n'):
+            # Strip mnt prefix
+            if port.startswith(mnt):
+                port = port[len(mnt)+1:]
+            root.append((port, self.generate_dependency_tree(port)))
+
+        self.cache[port_path] = root
+        return root
+
 class Overlay:
     @property
     def workspace(self):
@@ -142,23 +170,4 @@ class Bandar:
         return out
 
     def generate_dependency_tree(self, port_path):
-        root = []
-
-        mnt = self.overlay.mountpoint
-        path = os.path.join(mnt, port_path)
-        cmd = ['make', 'run-depends-list']
-        env = extend_env(PORTSDIR=mnt)
-
-        ports = subprocess.check_output(cmd, cwd=path, env=env)\
-            .decode().strip()
-
-        if ports == '':
-            return root
-
-        for port in ports.split('\n'):
-            # Strip mnt prefix
-            if port.startswith(mnt):
-                port = port[len(mnt)+1:]
-            root.append((port, self.generate_dependency_tree(port)))
-
-        return root
+        return TreeGenerator(self).run(port_path)
