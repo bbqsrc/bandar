@@ -126,8 +126,8 @@ class Bandar:
         try:
             data = subprocess.check_output(cmd, cwd=mnt, env=env)
         except subprocess.CalledProcessError as e:
-            # if 1, just means linting found an error
-            if e.returncode == 1:
+            # if >= 0, just means linting found an error
+            if e.returncode >= 0:
                 data = e.output
             else:
                 # Otherwise, propagate
