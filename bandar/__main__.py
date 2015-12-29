@@ -146,6 +146,18 @@ def test_handler(args, bandar):
     bandar.test_ports(ports)
     print("Please wait, unmounting overlay...", file=sys.stderr)
 
+def tree_args(p):
+    p.add_argument('port', help="Port for which a tree shall be printed")
+    return p
+
+def tree_handler(args, bandar):
+    port = args.port
+    tree = bandar.generate_dependency_tree(port)
+
+    print(tree)
+
+    print("Please wait, unmounting overlay...", file=sys.stderr)
+
 def lint_args(p):
     p.add_argument('ports', nargs='+',
         help="Ports to be tested, provide 'all' to test all")
@@ -176,6 +188,8 @@ commands = {
     #    'Generate diff patches', False),
     'lint': Target(lint_args, lint_handler,
         'Run `portlint` on development ports', True),
+    'tree': Target(tree_args, tree_handler,
+        'Print dependency tree for a port', True),
     'poudriere': Target(poudriere_args, poudriere_handler,
         'Run `poudriere` on development ports', True),
     'test': Target(test_args, test_handler,

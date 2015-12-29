@@ -140,3 +140,22 @@ class Bandar:
             errors=[x.replace(mnt + '/', '') for x in results if x.startswith("FATAL")])
 
         return out
+
+    def generate_dependency_tree(self, port_path):
+        root = []
+
+        mnt = self.overlay.mountpoint
+        path = os.path.join(mnt, port_path)
+        cmd = ['make', 'run-depends']
+        env = extend_env(PORTSDIR=mnt)
+
+        ports = subprocess.check_output(cmd, cwd=mnt, env=env)
+            .decode().strip().split('\n')
+
+        for port in ports:
+            # Strip mnt prefix
+            if port.startswith(mnt):
+                port = port[len(mnt):]
+            root.append((port, self.generate_dependency_tree(port)))
+
+        return root
